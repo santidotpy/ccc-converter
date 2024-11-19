@@ -170,8 +170,13 @@ export default function Home() {
                               size="icon"
                               className="mt-6"
                               onClick={() => {
+                                // swap currencies
+                                const tempFrom = fromCurrency;
                                 setFromCurrency(toCurrency);
-                                setToCurrency(fromCurrency);
+                                setToCurrency(tempFrom);
+
+                                // redo the conversion with swapped currencies
+                                handleConvert(new Event('submit') as unknown as React.FormEvent);
                               }}
                               type="button"
                             >
