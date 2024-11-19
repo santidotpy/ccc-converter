@@ -174,7 +174,6 @@ export default function Home() {
                                 const tempFrom = fromCurrency;
                                 setFromCurrency(toCurrency);
                                 setToCurrency(tempFrom);
-
                                 // redo the conversion with swapped currencies
                                 handleConvert(new Event('submit') as unknown as React.FormEvent);
                               }}
