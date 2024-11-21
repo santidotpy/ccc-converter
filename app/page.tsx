@@ -76,6 +76,12 @@ export default function Home() {
     }
   };
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAmount = e.target.value;
+    if (Number(newAmount) < 0) return;
+    setAmount(newAmount);
+};
+
 
   return (
     <div className="flex flex-col min-h-screen items-center px-4 justify-center">
@@ -145,7 +151,7 @@ export default function Home() {
                               placeholder="Enter amount"
                               type="number"
                               value={amount}
-                              onChange={(e) => setAmount(e.target.value)}
+                              onChange={handleAmountChange}
                               className="w-full"
                             />
                           </div>
