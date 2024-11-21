@@ -26,6 +26,7 @@ const ArgentinaInfo = ({ currenciesArg }: { currenciesArg: Currency[] }) => {
 
     const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newAmount = e.target.value;
+        if (Number(newAmount) < 0) return;
         setAmount(newAmount);
         calculateAmount(newAmount, selectedCurrency);
     };
