@@ -36,7 +36,7 @@ export default function Footer() {
                 <section className="flex flex-col items-center sm:flex-col">
 
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-center sm:text-left">
-                        © {new Date().getFullYear()} Currency Converter.
+                        © {new Date().getFullYear()} C&C Converter
                     </p>
 
                 </section>
