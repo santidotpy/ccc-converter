@@ -19,8 +19,14 @@ export default function Home() {
   const [amount, setAmount] = useState<number | string>("");
   const [fromCurrency, setFromCurrency] = useState<string>("usd");
   const [toCurrency, setToCurrency] = useState<string>("chf");
-  const [conversionResult, setConversionResult] = useState<number | null>(null);
+  const [conversionResult, setConversionResult] = useState<number | string | null>(null);
   const [activeTab, setActiveTab] = useState("converter");
+
+  const [lastConversionParams, setLastConversionParams] = useState<{
+    amount: number | string,
+    fromCurrency: string,
+    toCurrency: string
+  } | null>(null);
 
   // Fetch available currencies on component mount
   useEffect(() => {
@@ -66,8 +72,13 @@ export default function Home() {
       );
       const data = await response.json();
       const rate = data[fromCurrency][toCurrency];
+      const currencyFormatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: toCurrency.toUpperCase()
+      }).format(Number(amount) * rate);
       if (rate) {
-        setConversionResult(Number(amount) * rate);
+        setConversionResult(currencyFormatted);
+        setLastConversionParams({ amount, fromCurrency, toCurrency });
       } else {
         toast.error('Conversion rate not available')
       }
@@ -78,10 +89,15 @@ export default function Home() {
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newAmount = e.target.value;
-    if (Number(newAmount) < 0) return;
-    setAmount(newAmount);
-};
 
+    // Validate amount input
+    if (newAmount === '' || (Number(newAmount) >= 0 && !isNaN(Number(newAmount)) && newAmount.length <= 10)) {
+      if (lastConversionParams) {
+        setConversionResult(null);
+      }
+      setAmount(newAmount);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen items-center px-4 justify-center">
@@ -158,7 +174,16 @@ export default function Home() {
                           <div className="flex flex-col sm:flex-row items-center gap-2">
                             <div className="w-full sm:w-[45%]">
                               <Label htmlFor="from">From</Label>
-                              <Select onValueChange={setFromCurrency} value={fromCurrency}>
+                              <Select
+                                onValueChange={(value) => {
+                                  setFromCurrency(value);
+                                  // reset conversion result when currency changes
+                                  if (lastConversionParams) {
+                                    setConversionResult(null);
+                                  }
+                                }}
+                                value={fromCurrency}
+                              >
                                 <SelectTrigger id="from" className="w-full">
                                   <SelectValue placeholder="Select currency" className="w-full truncate" />
                                 </SelectTrigger>
@@ -176,12 +201,14 @@ export default function Home() {
                               size="icon"
                               className="mt-6"
                               onClick={() => {
+                                // reset conversion result before swapping
+                                setConversionResult(null);
+                                setLastConversionParams(null);
+
                                 // swap currencies
                                 const tempFrom = fromCurrency;
                                 setFromCurrency(toCurrency);
                                 setToCurrency(tempFrom);
-                                // redo the conversion with swapped currencies
-                                handleConvert(new Event('submit') as unknown as React.FormEvent);
                               }}
                               type="button"
                             >
@@ -190,7 +217,16 @@ export default function Home() {
                             </Button>
                             <div className="w-full sm:w-[45%]">
                               <Label htmlFor="to">To</Label>
-                              <Select onValueChange={setToCurrency} value={toCurrency}>
+                              <Select
+                                onValueChange={(value) => {
+                                  setToCurrency(value);
+                                  // reset conversion result when currency changes
+                                  if (lastConversionParams) {
+                                    setConversionResult(null);
+                                  }
+                                }}
+                                value={toCurrency}
+                              >
                                 <SelectTrigger id="to" className="w-full">
                                   <SelectValue placeholder="Select currency" className="w-full truncate" />
                                 </SelectTrigger>
@@ -205,12 +241,12 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="flex justify-center items-center w-full min-h-[48px] px-2">
-                            {conversionResult !== null && (
+                            {conversionResult !== null && lastConversionParams && (
                               <div className="text-center text-base sm:text-lg md:text-xl font-semibold break-words">
                                 <p className="flex flex-wrap justify-center gap-1">
-                                  <span>{amount} {fromCurrency.toUpperCase()}</span>
+                                  <span>{lastConversionParams.amount} {lastConversionParams.fromCurrency.toUpperCase()}</span>
                                   <span>=</span>
-                                  <span>{conversionResult.toFixed(2)} {toCurrency.toUpperCase()}</span>
+                                  <span>{conversionResult} {lastConversionParams.toCurrency.toUpperCase()}</span>
                                 </p>
                               </div>
                             )}
